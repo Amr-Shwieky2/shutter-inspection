@@ -7,7 +7,7 @@ import ConfirmModal from './components/ConfirmModal';
 import PrintReport from './components/PrintReport';
 import TeamGate from './components/TeamGate';
 import { DIR_ORDER } from './constants';
-import { makeEmptyDirections, cloneDirections, isFloorComplete, toggleWindowStatus } from './domain';
+import { makeEmptyDirections, cloneDirections, toggleWindowStatus } from './domain';
 import { loadPersisted, savePersisted } from './utils/storage';
 import { genId } from './utils/id';
 import { subscribeToFloors, saveFloorRemote, deleteFloorRemote, clearAllFloorsRemote } from './firebaseClient';
@@ -73,11 +73,11 @@ export default function App() {
     });
   }
 
-  const canSave = floorInput.trim().length > 0 && isFloorComplete(sel);
+  const canSave = floorInput.trim().length > 0;
 
   function handleSaveFloor() {
     if (!canSave) {
-      setToast(!floorInput.trim() ? 'נא להזין מספר קומה' : 'יש לבחור סטטוס לכל חלון שהוגדר');
+      setToast('נא להזין מספר קומה');
       return;
     }
     const label = floorInput.trim();

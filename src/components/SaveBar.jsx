@@ -1,9 +1,9 @@
-import { totalWindows, filledWindows } from '../domain';
+import { totalWindows, flaggedWindowsCount } from '../domain';
 
 export default function SaveBar({ sel, canSave, editing, onSave }) {
   const total = totalWindows(sel);
-  const filled = filledWindows(sel);
-  const pct = total ? Math.round((filled / total) * 100) : 0;
+  const flagged = flaggedWindowsCount(sel);
+  const pct = total ? Math.round((flagged / total) * 100) : 0;
 
   return (
     <div className="save-bar">
@@ -12,7 +12,7 @@ export default function SaveBar({ sel, canSave, editing, onSave }) {
           <div className="progress-fill" style={{ width: `${pct}%` }} />
         </div>
         <span className="progress-text">
-          {filled}/{total} חלונות הוגדרו
+          {flagged}/{total} חלונות עם ליקוי
         </span>
       </div>
       <button type="button" className="btn-primary btn-save" disabled={!canSave} onClick={onSave}>

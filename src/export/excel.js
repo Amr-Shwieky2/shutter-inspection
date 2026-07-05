@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 import { DIR_ORDER, DIR_LABEL, statusMeta } from '../constants';
 import { formatDateTime, fileBaseName } from '../utils/format';
 
-const CELL_FILL = { ok: 'FFDCFCE7', issue: 'FFFEE2E2', empty: 'FFF1F5F9' };
+const CELL_FILL = { ok: 'FFDCFCE7', issue: 'FFFEE2E2' };
 const FONT_COLOR = {
   ok: 'FF14532D',
   not_closing: 'FFC2410C',
@@ -16,9 +16,6 @@ const CELL_BORDER = { top: THIN_BORDER, bottom: THIN_BORDER, left: THIN_BORDER, 
 
 function statusCellValue(statuses) {
   if (statuses.length === 0) {
-    return { value: 'לא צוין', fill: CELL_FILL.empty };
-  }
-  if (statuses.length === 1 && statuses[0] === 'ok') {
     return { value: 'תקין', fill: CELL_FILL.ok };
   }
   const richText = [];

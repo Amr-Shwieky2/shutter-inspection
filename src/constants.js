@@ -7,15 +7,19 @@ export const DIRS = [
 export const DIR_ORDER = DIRS.map((d) => d.id);
 export const DIR_LABEL = Object.fromEntries(DIRS.map((d) => [d.id, d.he]));
 
-// Each window can have zero-or-more of the 4 problem statuses selected at
-// once, or the single "ok" status - "ok" and problem statuses are mutually
-// exclusive (see toggleWindowStatus in domain.js). "not_closing" is a
-// deliberately new id, not a reuse of the old single-select "shutter" id -
-// the client's corrected wording ("וילון לא יורד עד למטה") is a different
-// claim than the old "השטר קצר מדי", so old saved data must not be silently
-// reinterpreted under a recycled id.
-export const STATUS_ORDER = ['ok', 'not_closing', 'cable', 'motor', 'disconnect'];
-export const PROBLEM_STATUS_ORDER = STATUS_ORDER.filter((id) => id !== 'ok');
+// Each window can have zero-or-more of these 4 problem statuses selected at
+// once. There is no selectable "ok" button (removed per client request) - a
+// window with none of the 4 selected is implicitly fine. "ok" is still kept
+// in STATUS_META (but not in STATUS_ORDER, so no button renders for it) so
+// that any already-saved data from before this change - which did store an
+// explicit "ok" - still displays correctly instead of showing as unknown.
+// "not_closing" is a deliberately new id, not a reuse of the old
+// single-select "shutter" id - the client's corrected wording
+// ("וילון לא יורד עד למטה") is a different claim than the old "השטר קצר
+// מדי", so old saved data must not be silently reinterpreted under a
+// recycled id.
+export const STATUS_ORDER = ['not_closing', 'cable', 'motor', 'disconnect'];
+export const PROBLEM_STATUS_ORDER = STATUS_ORDER;
 export const STATUS_META = {
   ok: { title: 'תקין' },
   not_closing: { title: 'וילון לא יורד עד למטה' },

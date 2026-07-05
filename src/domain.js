@@ -1,19 +1,20 @@
 import { DIR_ORDER, DEFAULT_WINDOW_COUNT, PROBLEM_STATUS_ORDER } from './constants';
 
-// A window's value is an array of selected status ids: [] (unanswered),
-// ['ok'], or one-or-more problem ids (e.g. ['cable', 'disconnect']). "ok"
-// and problem ids are always mutually exclusive - enforced by
-// toggleWindowStatus, the single place that mutates a window's selection.
+// A window's value is an array of selected problem status ids: [] means no
+// problem was flagged for that window (implicitly fine - there is no
+// selectable "ok" button), or one-or-more problem ids (e.g. ['cable',
+// 'disconnect']).
 //
 // Firestore rejects arrays that directly contain other arrays, so a window's
 // array can't be stored as a bare array-of-arrays under `windows`. On the way
 // to Firestore each window is wrapped as {statuses: [...]} (array-of-maps,
 // which Firestore allows); normalizeWindowEntry unwraps that (and legacy
-// pre-multi-select formats) back into a plain array for in-app use.
+// pre-multi-select formats, including a possible old explicit "ok") back
+// into a plain array for in-app use.
 export function normalizeWindowEntry(w) {
-  if (Array.isArray(w)) return w;
-  if (w && Array.isArray(w.statuses)) return w.statuses;
-  if (w === null || w === undefined) return [];
+  if (Array.isArray(w)) return w.filter((s) => s !== 'ok');
+  if (w && Array.isArray(w.statuses)) return w.statuses.filter((s) => s !== 'ok');
+  if (w === null || w === undefined || w === 'ok') return [];
   return [w]; // legacy single-status documents saved before multi-select
 }
 
@@ -35,11 +36,7 @@ export function toFirestoreDirections(directions) {
 }
 
 export function toggleWindowStatus(current, statusId) {
-  if (statusId === 'ok') {
-    return current.includes('ok') ? [] : ['ok'];
-  }
-  const withoutOk = current.filter((s) => s !== 'ok');
-  return withoutOk.includes(statusId) ? withoutOk.filter((s) => s !== statusId) : [...withoutOk, statusId];
+  return current.includes(statusId) ? current.filter((s) => s !== statusId) : [...current, statusId];
 }
 
 export function makeEmptyDirections(counts = {}) {
@@ -59,15 +56,14 @@ export function cloneDirections(directions) {
   return result;
 }
 
-export function isFloorComplete(directions) {
-  return DIR_ORDER.every((id) => directions[id].windows.every((w) => w.length > 0));
-}
-
 export function totalWindows(directions) {
   return DIR_ORDER.reduce((sum, id) => sum + directions[id].count, 0);
 }
 
-export function filledWindows(directions) {
+// How many windows currently have at least one problem flagged - used for
+// live feedback in the save bar while filling out a floor (there's no
+// "completion" requirement anymore since a blank window is valid/fine).
+export function flaggedWindowsCount(directions) {
   return DIR_ORDER.reduce((sum, id) => sum + directions[id].windows.filter((w) => w.length > 0).length, 0);
 }
 
@@ -79,7 +75,7 @@ export function countIssueWindows(floors) {
   floors.forEach((f) => {
     DIR_ORDER.forEach((d) => {
       f.directions[d].windows.forEach((w) => {
-        if (w.length > 0 && !w.includes('ok')) n++;
+        if (w.length > 0) n++;
       });
     });
   });
@@ -105,5 +101,5 @@ export function totalWindowsInspected(floors) {
 }
 
 export function allClearFloorsCount(floors) {
-  return floors.filter((f) => DIR_ORDER.every((d) => f.directions[d].windows.every((w) => w.length > 0 && w[0] === 'ok'))).length;
+  return floors.filter((f) => DIR_ORDER.every((d) => f.directions[d].windows.every((w) => w.length === 0))).length;
 }

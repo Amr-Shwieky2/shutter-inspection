@@ -36,7 +36,7 @@ export default function SummaryTable({ floors, onEdit, onDelete }) {
                           <span className="window-chip-group" key={i}>
                             {count > 1 && <span className="window-chip-index">{i + 1}.</span>}
                             {statuses.length === 0 ? (
-                              <span className="chip-muted">—</span>
+                              <span className="chip tone-ok">{statusMeta('ok').title}</span>
                             ) : (
                               statuses.map((s) => (
                                 <span key={s} className={`chip tone-${s}`}>

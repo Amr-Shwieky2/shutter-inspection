@@ -71,11 +71,15 @@ export default function PrintReport({ floors, site, inspector }) {
                 <td>{r.dir}</td>
                 <td>{r.win}</td>
                 <td className="p-cell">
-                  {r.statuses.map((s) => (
-                    <span key={s} className={`p-tag p-${s}`}>
-                      {statusMeta(s).title}
-                    </span>
-                  ))}
+                  {r.statuses.length === 0 ? (
+                    <span className="p-tag p-ok">{statusMeta('ok').title}</span>
+                  ) : (
+                    r.statuses.map((s) => (
+                      <span key={s} className={`p-tag p-${s}`}>
+                        {statusMeta(s).title}
+                      </span>
+                    ))
+                  )}
                 </td>
                 <td className="p-date">{formatDateTime(r.when)}</td>
               </tr>

@@ -30,7 +30,7 @@ export default function RecentFloorList({ floors, editingId, onEdit, onDelete })
                         windows.map((statuses, i) => (
                           <span key={i} className="window-dot-group">
                             {statuses.length === 0 ? (
-                              <span className="dot dot-empty" />
+                              <span className="dot dot-ok" title="תקין" />
                             ) : (
                               statuses.map((s, j) => <span key={j} className={`dot dot-${s}`} />)
                             )}
