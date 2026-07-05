@@ -210,15 +210,15 @@ h1, h2, h3, p { margin: 0; }
   display: flex; align-items: center; justify-content: center; flex: none;
 }
 .dir-label { font-size: 16px; font-weight: 700; }
-.win-count-stepper { flex: none; display: flex; align-items: center; gap: 6px; }
+.win-count-stepper { flex: none; display: flex; align-items: center; gap: 4px; }
 .win-count-caption { font-size: 11px; color: var(--ink-dim); }
 .mini-btn {
-  width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--surface-2); font-size: 15px; font-weight: 700; color: var(--accent);
-  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface-2); font-size: 18px; font-weight: 700; color: var(--accent);
+  display: flex; align-items: center; justify-content: center; flex: none;
 }
 .mini-btn:active { transform: scale(.92); }
-.win-count-num { min-width: 18px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.win-count-num { min-width: 22px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
 .no-windows { font-size: 13px; color: var(--ink-dim); padding: 4px 2px 2px; }
 .window-block + .window-block { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; }
 .window-label { font-size: 12px; font-weight: 700; color: var(--ink-dim); margin-bottom: 4px; }
@@ -310,7 +310,7 @@ h1, h2, h3, p { margin: 0; }
 .dot-shutter { background: var(--shutter); }
 .dot-empty { background: transparent; border: 1px dashed var(--border); }
 .icon-btn {
-  flex: none; width: 40px; background: none; border: none; color: var(--ink-dim); border-radius: 8px;
+  flex: none; width: 44px; min-height: 44px; background: none; border: none; color: var(--ink-dim); border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
 }
 .icon-btn.danger:active, .icon-btn:active { background: var(--surface-2); }
