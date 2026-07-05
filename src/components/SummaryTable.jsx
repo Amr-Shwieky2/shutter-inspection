@@ -1,4 +1,4 @@
-import { DIR_ORDER, STATUS_META } from '../constants';
+import { DIR_ORDER, statusMeta } from '../constants';
 import { EditIcon, TrashIcon } from '../icons';
 
 export default function SummaryTable({ floors, onEdit, onDelete }) {
@@ -32,14 +32,20 @@ export default function SummaryTable({ floors, onEdit, onDelete }) {
                       <span className="chip-muted">—</span>
                     ) : (
                       <div className="chip-wrap">
-                        {windows.map((w, i) => {
-                          const meta = STATUS_META[w];
-                          return (
-                            <span key={i} className={`chip tone-${meta.tone}`} title={meta.desc}>
-                              {count > 1 ? `${i + 1}. ${meta.title}` : meta.title}
-                            </span>
-                          );
-                        })}
+                        {windows.map((statuses, i) => (
+                          <span className="window-chip-group" key={i}>
+                            {count > 1 && <span className="window-chip-index">{i + 1}.</span>}
+                            {statuses.length === 0 ? (
+                              <span className="chip-muted">—</span>
+                            ) : (
+                              statuses.map((s) => (
+                                <span key={s} className={`chip tone-${s}`}>
+                                  {statusMeta(s).title}
+                                </span>
+                              ))
+                            )}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </td>

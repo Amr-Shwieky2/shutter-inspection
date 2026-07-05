@@ -1,11 +1,33 @@
 import ExcelJS from 'exceljs';
-import { DIR_ORDER, DIR_LABEL, STATUS_META } from '../constants';
+import { DIR_ORDER, DIR_LABEL, statusMeta } from '../constants';
 import { formatDateTime, fileBaseName } from '../utils/format';
 
-const FILL = { ok: 'FFDCFCE7', cable: 'FFFEF3C7', motor: 'FFFEE2E2', shutter: 'FFFFEDD5' };
-const FONT_COLOR = { ok: 'FF14532D', cable: 'FF78350F', motor: 'FF7F1D1D', shutter: 'FF7C2D12' };
+const CELL_FILL = { ok: 'FFDCFCE7', issue: 'FFFEE2E2', empty: 'FFF1F5F9' };
+const FONT_COLOR = {
+  ok: 'FF14532D',
+  not_closing: 'FFC2410C',
+  cable: 'FF78350F',
+  motor: 'FF7F1D1D',
+  disconnect: 'FF4C1D95',
+};
+const SEPARATOR_COLOR = 'FF475569';
 const THIN_BORDER = { style: 'thin', color: { argb: 'FFCBD5E1' } };
 const CELL_BORDER = { top: THIN_BORDER, bottom: THIN_BORDER, left: THIN_BORDER, right: THIN_BORDER };
+
+function statusCellValue(statuses) {
+  if (statuses.length === 0) {
+    return { value: 'לא צוין', fill: CELL_FILL.empty };
+  }
+  if (statuses.length === 1 && statuses[0] === 'ok') {
+    return { value: 'תקין', fill: CELL_FILL.ok };
+  }
+  const richText = [];
+  statuses.forEach((s, i) => {
+    if (i > 0) richText.push({ font: { color: { argb: SEPARATOR_COLOR } }, text: ', ' });
+    richText.push({ font: { bold: true, color: { argb: FONT_COLOR[s] ?? SEPARATOR_COLOR } }, text: statusMeta(s).title });
+  });
+  return { value: { richText }, fill: CELL_FILL.issue };
+}
 
 export async function exportExcel(floors, site) {
   const workbook = new ExcelJS.Workbook();
@@ -22,7 +44,7 @@ export async function exportExcel(floors, site) {
     { header: 'בודק', key: 'inspector', width: 18 },
     { header: 'כיוון', key: 'dir', width: 14 },
     { header: 'חלון מס׳', key: 'win', width: 10 },
-    { header: 'סטטוס', key: 'status', width: 36 },
+    { header: 'סטטוס', key: 'status', width: 40 },
     { header: 'תאריך ושעה', key: 'when', width: 20 },
   ];
 
@@ -36,14 +58,15 @@ export async function exportExcel(floors, site) {
   floors.forEach((floor) => {
     DIR_ORDER.forEach((dirId) => {
       const { count, windows } = floor.directions[dirId];
-      windows.forEach((status, index) => {
+      windows.forEach((statuses, index) => {
+        const { value, fill } = statusCellValue(statuses);
         const row = sheet.addRow({
           floor: floor.floorLabel,
           site: floor.site || '—',
           inspector: floor.inspector || '—',
           dir: DIR_LABEL[dirId],
           win: count > 1 ? index + 1 : '—',
-          status: STATUS_META[status].desc,
+          status: value,
           when: formatDateTime(floor.savedAt),
         });
         row.eachCell((cell) => {
@@ -51,9 +74,7 @@ export async function exportExcel(floors, site) {
           cell.border = CELL_BORDER;
         });
         row.getCell('floor').font = { bold: true };
-        const statusCell = row.getCell('status');
-        statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: FILL[status] } };
-        statusCell.font = { bold: true, color: { argb: FONT_COLOR[status] } };
+        row.getCell('status').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fill } };
       });
     });
   });

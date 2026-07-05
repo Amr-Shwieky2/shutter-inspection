@@ -7,7 +7,7 @@ import ConfirmModal from './components/ConfirmModal';
 import PrintReport from './components/PrintReport';
 import TeamGate from './components/TeamGate';
 import { DIR_ORDER } from './constants';
-import { makeEmptyDirections, cloneDirections, isFloorComplete } from './domain';
+import { makeEmptyDirections, cloneDirections, isFloorComplete, toggleWindowStatus } from './domain';
 import { loadPersisted, savePersisted } from './utils/storage';
 import { genId } from './utils/id';
 import { subscribeToFloors, saveFloorRemote, deleteFloorRemote, clearAllFloorsRemote } from './firebaseClient';
@@ -59,16 +59,16 @@ export default function App() {
     setSel((prev) => {
       const cur = prev[dirId];
       const windows = cur.windows.slice(0, newCount);
-      while (windows.length < newCount) windows.push(null);
+      while (windows.length < newCount) windows.push([]);
       return { ...prev, [dirId]: { count: newCount, windows } };
     });
   }
 
-  function handleStatusChange(dirId, index, statusId) {
+  function handleToggleStatus(dirId, index, statusId) {
     setSel((prev) => {
       const cur = prev[dirId];
       const windows = cur.windows.slice();
-      windows[index] = statusId;
+      windows[index] = toggleWindowStatus(windows[index], statusId);
       return { ...prev, [dirId]: { ...cur, windows } };
     });
   }
@@ -213,7 +213,7 @@ export default function App() {
             onStepFloor={stepFloor}
             sel={sel}
             onCountChange={handleCountChange}
-            onStatusChange={handleStatusChange}
+            onToggleStatus={handleToggleStatus}
             editingId={editingId}
             onCancelEdit={handleCancelEdit}
             canSave={canSave}

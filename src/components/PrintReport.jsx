@@ -1,14 +1,14 @@
-import { DIR_ORDER, DIR_LABEL, STATUS_META } from '../constants';
+import { DIR_ORDER, DIR_LABEL, statusMeta } from '../constants';
 import { formatDateTime } from '../utils/format';
-import { countIssues, totalWindowsInspected } from '../domain';
+import { countIssueWindows, totalWindowsInspected } from '../domain';
 
 export default function PrintReport({ floors, site, inspector }) {
-  const issues = countIssues(floors);
+  const issueWindows = countIssueWindows(floors);
   const rows = [];
   floors.forEach((f) => {
     DIR_ORDER.forEach((d) => {
       const { count, windows } = f.directions[d];
-      windows.forEach((status, i) => {
+      windows.forEach((statuses, i) => {
         rows.push({
           key: `${f.id}-${d}-${i}`,
           floor: f.floorLabel,
@@ -16,7 +16,7 @@ export default function PrintReport({ floors, site, inspector }) {
           floorInspector: f.inspector,
           dir: DIR_LABEL[d],
           win: count > 1 ? i + 1 : '—',
-          status,
+          statuses,
           when: f.savedAt,
         });
       });
@@ -46,8 +46,8 @@ export default function PrintReport({ floors, site, inspector }) {
           <div>
             <b>{totalWindowsInspected(floors)}</b> חלונות נבדקו
           </div>
-          <div className={issues > 0 ? 'p-bad' : 'p-good'}>
-            <b>{issues}</b> ליקויים נמצאו
+          <div className={issueWindows > 0 ? 'p-bad' : 'p-good'}>
+            <b>{issueWindows}</b> חלונות עם ליקוי
           </div>
         </div>
         <table className="p-table">
@@ -70,7 +70,13 @@ export default function PrintReport({ floors, site, inspector }) {
                 <td>{r.floorInspector || '—'}</td>
                 <td>{r.dir}</td>
                 <td>{r.win}</td>
-                <td className={`p-cell p-${STATUS_META[r.status].tone}`}>{STATUS_META[r.status].title}</td>
+                <td className="p-cell">
+                  {r.statuses.map((s) => (
+                    <span key={s} className={`p-tag p-${s}`}>
+                      {statusMeta(s).title}
+                    </span>
+                  ))}
+                </td>
                 <td className="p-date">{formatDateTime(r.when)}</td>
               </tr>
             ))}

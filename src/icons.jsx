@@ -45,11 +45,19 @@ export function StatusIcon({ id }) {
       </svg>
     );
   }
+  if (id === 'not_closing') {
+    return (
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path d="M12 4v9M9 9.5l3 3 3-3" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="5.5" y1="18" x2="18.5" y2="18" stroke="currentColor" strokeWidth="1.4" strokeDasharray="2 2.2" />
+      </svg>
+    );
+  }
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <path d="M3 12h6M9 12 6 9M9 12 6 15" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M21 12h-6M15 12l3-3M15 12l3 3" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="12" y1="5.5" x2="12" y2="18.5" stroke="currentColor" strokeWidth="1.3" strokeDasharray="2 2.4" />
+      <rect x="3" y="9" width="6" height="6" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="15" y="9" width="6" height="6" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M9.5 9.5 14.5 14.5M9.5 14.5 14.5 9.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }

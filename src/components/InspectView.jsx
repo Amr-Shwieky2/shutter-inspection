@@ -14,7 +14,7 @@ export default function InspectView({
   onStepFloor,
   sel,
   onCountChange,
-  onStatusChange,
+  onToggleStatus,
   editingId,
   onCancelEdit,
   canSave,
@@ -89,7 +89,7 @@ export default function InspectView({
             dir={d}
             data={sel[d.id]}
             onCountChange={(n) => onCountChange(d.id, n)}
-            onStatusChange={(i, statusId) => onStatusChange(d.id, i, statusId)}
+            onToggleStatus={(i, statusId) => onToggleStatus(d.id, i, statusId)}
           />
         ))}
       </section>

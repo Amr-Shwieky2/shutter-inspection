@@ -12,6 +12,7 @@ import {
   writeBatch,
   serverTimestamp,
 } from 'firebase/firestore';
+import { normalizeDirections, toFirestoreDirections } from './domain';
 
 // Firebase web config is not a secret - access is governed by Firestore
 // security rules (see firestore.rules), not by hiding this key.
@@ -39,15 +40,22 @@ function floorsCollection(teamCode) {
 
 export function subscribeToFloors(teamCode, onChange) {
   return onSnapshot(floorsCollection(teamCode), (snapshot) => {
-    const floors = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const floors = snapshot.docs.map((d) => {
+      const data = d.data();
+      return { id: d.id, ...data, directions: normalizeDirections(data.directions ?? {}) };
+    });
     floors.sort((a, b) => (a.savedAt?.toMillis?.() ?? a.savedAt ?? 0) - (b.savedAt?.toMillis?.() ?? b.savedAt ?? 0));
     onChange(floors);
   });
 }
 
 export async function saveFloorRemote(teamCode, floor) {
-  const { id, ...data } = floor;
-  await setDoc(doc(floorsCollection(teamCode), id), { ...data, syncedAt: serverTimestamp() });
+  const { id, directions, ...data } = floor;
+  await setDoc(doc(floorsCollection(teamCode), id), {
+    ...data,
+    directions: toFirestoreDirections(directions),
+    syncedAt: serverTimestamp(),
+  });
 }
 
 export async function deleteFloorRemote(teamCode, id) {

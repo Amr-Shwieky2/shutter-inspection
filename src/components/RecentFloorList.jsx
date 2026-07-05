@@ -1,4 +1,4 @@
-import { DIR_ORDER, DIR_LABEL, STATUS_META } from '../constants';
+import { DIR_ORDER, DIR_LABEL } from '../constants';
 import { TrashIcon } from '../icons';
 
 export default function RecentFloorList({ floors, editingId, onEdit, onDelete }) {
@@ -27,7 +27,15 @@ export default function RecentFloorList({ floors, editingId, onEdit, onDelete })
                       {count === 0 ? (
                         <span className="dot dot-empty" />
                       ) : (
-                        windows.map((w, i) => <span key={i} className={`dot dot-${STATUS_META[w]?.tone ?? ''}`} />)
+                        windows.map((statuses, i) => (
+                          <span key={i} className="window-dot-group">
+                            {statuses.length === 0 ? (
+                              <span className="dot dot-empty" />
+                            ) : (
+                              statuses.map((s, j) => <span key={j} className={`dot dot-${s}`} />)
+                            )}
+                          </span>
+                        ))
                       )}
                     </span>
                   );

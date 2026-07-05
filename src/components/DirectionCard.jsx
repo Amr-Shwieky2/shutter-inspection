@@ -2,7 +2,7 @@ import { STATUS_ORDER, MAX_WINDOWS_PER_DIRECTION } from '../constants';
 import StatusButton from './StatusButton';
 import { ArrowIcon } from '../icons';
 
-export default function DirectionCard({ dir, data, onCountChange, onStatusChange }) {
+export default function DirectionCard({ dir, data, onCountChange, onToggleStatus }) {
   const { count, windows } = data;
 
   return (
@@ -37,7 +37,7 @@ export default function DirectionCard({ dir, data, onCountChange, onStatusChange
 
       {count === 0 && <p className="no-windows">אין חלונות בכיוון זה בקומה זו</p>}
 
-      {windows.map((status, index) => (
+      {windows.map((selectedStatuses, index) => (
         <div className="window-block" key={index}>
           {count > 1 && <div className="window-label">חלון {index + 1}</div>}
           <div className="status-grid">
@@ -45,8 +45,8 @@ export default function DirectionCard({ dir, data, onCountChange, onStatusChange
               <StatusButton
                 key={statusId}
                 statusId={statusId}
-                selected={status === statusId}
-                onClick={() => onStatusChange(index, statusId)}
+                selected={selectedStatuses.includes(statusId)}
+                onClick={() => onToggleStatus(index, statusId)}
               />
             ))}
           </div>
