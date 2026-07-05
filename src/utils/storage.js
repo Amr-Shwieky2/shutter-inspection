@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'shutterInspectionApp.v1';
+const STORAGE_KEY = 'shutterInspectionApp.v2';
 
 export function loadPersisted() {
   try {

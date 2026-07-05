@@ -11,7 +11,14 @@ export default function RecentFloorList({ floors, editingId, onEdit, onDelete })
         {ordered.map((f) => (
           <li className={`floor-row${editingId === f.id ? ' floor-row-editing' : ''}`} key={f.id}>
             <button type="button" className="floor-row-main" onClick={() => onEdit(f.id)}>
-              <span className="floor-row-label">קומה {f.floorLabel}</span>
+              <span className="floor-row-text">
+                <span className="floor-row-label">קומה {f.floorLabel}</span>
+                {(f.site || f.inspector) && (
+                  <span className="floor-row-meta">
+                    {[f.site, f.inspector].filter(Boolean).join(' · ')}
+                  </span>
+                )}
+              </span>
               <span className="floor-row-dots">
                 {DIR_ORDER.map((d) => {
                   const { count, windows } = f.directions[d];

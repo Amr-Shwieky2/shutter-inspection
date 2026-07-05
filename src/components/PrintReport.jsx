@@ -12,6 +12,8 @@ export default function PrintReport({ floors, site, inspector }) {
         rows.push({
           key: `${f.id}-${d}-${i}`,
           floor: f.floorLabel,
+          floorSite: f.site,
+          floorInspector: f.inspector,
           dir: DIR_LABEL[d],
           win: count > 1 ? i + 1 : '—',
           status,
@@ -52,6 +54,8 @@ export default function PrintReport({ floors, site, inspector }) {
           <thead>
             <tr>
               <th>קומה</th>
+              <th>אתר</th>
+              <th>בודק</th>
               <th>כיוון</th>
               <th>חלון</th>
               <th>סטטוס</th>
@@ -62,6 +66,8 @@ export default function PrintReport({ floors, site, inspector }) {
             {rows.map((r) => (
               <tr key={r.key}>
                 <td className="p-floor">{r.floor}</td>
+                <td>{r.floorSite || '—'}</td>
+                <td>{r.floorInspector || '—'}</td>
                 <td>{r.dir}</td>
                 <td>{r.win}</td>
                 <td className={`p-cell p-${STATUS_META[r.status].tone}`}>{STATUS_META[r.status].title}</td>

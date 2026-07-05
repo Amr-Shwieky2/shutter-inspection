@@ -1,6 +1,6 @@
 import { CompassIcon } from '../icons';
 
-export default function TopBar({ tab, onTabChange, floorsCount }) {
+export default function TopBar({ tab, onTabChange, floorsCount, teamCode, onSwitchTeam }) {
   return (
     <header className="topbar">
       <div className="brand">
@@ -11,6 +11,9 @@ export default function TopBar({ tab, onTabChange, floorsCount }) {
           <strong>בקרת תריסים</strong>
           <span>דוח בדיקה בשטח לפי קומות</span>
         </div>
+        <button type="button" className="team-badge" onClick={onSwitchTeam} title="החלפת קוד צוות">
+          קוד: {teamCode}
+        </button>
       </div>
       <nav className="tabs">
         <button type="button" className={`tab${tab === 'inspect' ? ' active' : ''}`} onClick={() => onTabChange('inspect')}>

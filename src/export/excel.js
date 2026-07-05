@@ -18,6 +18,8 @@ export async function exportExcel(floors, site) {
 
   sheet.columns = [
     { header: 'קומה', key: 'floor', width: 12 },
+    { header: 'אתר', key: 'site', width: 22 },
+    { header: 'בודק', key: 'inspector', width: 18 },
     { header: 'כיוון', key: 'dir', width: 14 },
     { header: 'חלון מס׳', key: 'win', width: 10 },
     { header: 'סטטוס', key: 'status', width: 36 },
@@ -37,6 +39,8 @@ export async function exportExcel(floors, site) {
       windows.forEach((status, index) => {
         const row = sheet.addRow({
           floor: floor.floorLabel,
+          site: floor.site || '—',
+          inspector: floor.inspector || '—',
           dir: DIR_LABEL[dirId],
           win: count > 1 ? index + 1 : '—',
           status: STATUS_META[status].desc,

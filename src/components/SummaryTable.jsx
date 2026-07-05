@@ -18,7 +18,12 @@ export default function SummaryTable({ floors, onEdit, onDelete }) {
         <tbody>
           {floors.map((f) => (
             <tr key={f.id}>
-              <td className="s-floor">קומה {f.floorLabel}</td>
+              <td className="s-floor">
+                קומה {f.floorLabel}
+                {(f.site || f.inspector) && (
+                  <div className="s-floor-meta">{[f.site, f.inspector].filter(Boolean).join(' · ')}</div>
+                )}
+              </td>
               {DIR_ORDER.map((d) => {
                 const { count, windows } = f.directions[d];
                 return (

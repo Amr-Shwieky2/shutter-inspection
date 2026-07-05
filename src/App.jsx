@@ -5,18 +5,22 @@ import SummaryView from './components/SummaryView';
 import Toast from './components/Toast';
 import ConfirmModal from './components/ConfirmModal';
 import PrintReport from './components/PrintReport';
+import TeamGate from './components/TeamGate';
 import { DIR_ORDER } from './constants';
 import { makeEmptyDirections, cloneDirections, isFloorComplete } from './domain';
 import { loadPersisted, savePersisted } from './utils/storage';
 import { genId } from './utils/id';
+import { subscribeToFloors, saveFloorRemote, deleteFloorRemote, clearAllFloorsRemote } from './firebaseClient';
 
 export default function App() {
   const initial = useMemo(() => loadPersisted(), []);
 
+  const [teamCode, setTeamCode] = useState(initial?.teamCode ?? null);
+  const [floorsLoaded, setFloorsLoaded] = useState(false);
   const [tab, setTab] = useState('inspect');
   const [site, setSite] = useState(initial?.site ?? '');
   const [inspector, setInspector] = useState(initial?.inspector ?? '');
-  const [floors, setFloors] = useState(initial?.floors ?? []);
+  const [floors, setFloors] = useState([]);
   const [floorInput, setFloorInput] = useState('');
   const [sel, setSel] = useState(() => makeEmptyDirections());
   const [editingId, setEditingId] = useState(null);
@@ -24,14 +28,24 @@ export default function App() {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
-    savePersisted({ site, inspector, floors });
-  }, [site, inspector, floors]);
+    savePersisted({ teamCode, site, inspector });
+  }, [teamCode, site, inspector]);
 
   useEffect(() => {
     if (!toast) return undefined;
     const t = setTimeout(() => setToast(null), 2600);
     return () => clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    if (!teamCode) return undefined;
+    setFloorsLoaded(false);
+    const unsubscribe = subscribeToFloors(teamCode, (remoteFloors) => {
+      setFloors(remoteFloors);
+      setFloorsLoaded(true);
+    });
+    return unsubscribe;
+  }, [teamCode]);
 
   function stepFloor(delta) {
     setFloorInput((prev) => {
@@ -67,15 +81,23 @@ export default function App() {
       return;
     }
     const label = floorInput.trim();
-    if (editingId) {
-      setFloors((fs) =>
-        fs.map((f) => (f.id === editingId ? { ...f, floorLabel: label, directions: cloneDirections(sel), updatedAt: Date.now() } : f)),
-      );
-      setToast(`קומה ${label} עודכנה בהצלחה`);
-    } else {
-      setFloors((fs) => [...fs, { id: genId(), floorLabel: label, directions: cloneDirections(sel), savedAt: Date.now() }]);
-      setToast(`קומה ${label} נשמרה בהצלחה`);
-    }
+    const existing = editingId ? floors.find((f) => f.id === editingId) : null;
+    const floorDoc = {
+      id: editingId ?? genId(),
+      floorLabel: label,
+      directions: cloneDirections(sel),
+      site: site.trim(),
+      inspector: inspector.trim(),
+      savedAt: existing?.savedAt ?? Date.now(),
+      ...(existing ? { updatedAt: Date.now() } : {}),
+    };
+    // Firestore's offline cache applies this write locally right away and
+    // syncs in the background - don't block the UI on the network round-trip,
+    // or a worker with no signal gets no feedback and the form never advances.
+    saveFloorRemote(teamCode, floorDoc).catch(() => {
+      setToast('הסנכרון נכשל - הנתונים נשמרו במכשיר ויסונכרנו כשהחיבור יחזור');
+    });
+    setToast(editingId ? `קומה ${label} עודכנה בהצלחה` : `קומה ${label} נשמרה בהצלחה`);
     const carryCounts = Object.fromEntries(DIR_ORDER.map((d) => [d, sel[d].count]));
     const wasNumeric = /^\d+$/.test(label);
     setEditingId(null);
@@ -104,7 +126,9 @@ export default function App() {
     setConfirmState({
       message: `למחוק את קומה ${f.floorLabel}? לא ניתן לשחזר פעולה זו.`,
       onYes: () => {
-        setFloors((fs) => fs.filter((x) => x.id !== id));
+        deleteFloorRemote(teamCode, id).catch(() => {
+          setToast('המחיקה תסונכרן כשהחיבור יחזור');
+        });
         if (editingId === id) {
           setEditingId(null);
           setSel(makeEmptyDirections());
@@ -121,9 +145,11 @@ export default function App() {
       return;
     }
     setConfirmState({
-      message: `למחוק את כל הקומות שנשמרו (${floors.length})? פעולה זו אינה הפיכה.`,
+      message: `למחוק את כל הקומות שנשמרו (${floors.length})? פעולה זו אינה הפיכה ומשפיעה על כל הצוות.`,
       onYes: () => {
-        setFloors([]);
+        clearAllFloorsRemote(teamCode).catch(() => {
+          setToast('המחיקה תסונכרן כשהחיבור יחזור');
+        });
         setEditingId(null);
         setSel(makeEmptyDirections());
         setConfirmState(null);
@@ -151,12 +177,32 @@ export default function App() {
     window.print();
   }
 
+  function handleSwitchTeam() {
+    setConfirmState({
+      message: 'להתנתק מקוד הצוות הנוכחי ולעבור לקוד אחר?',
+      onYes: () => {
+        setTeamCode(null);
+        setFloors([]);
+        setFloorsLoaded(false);
+        setEditingId(null);
+        setSel(makeEmptyDirections());
+        setConfirmState(null);
+      },
+    });
+  }
+
+  if (!teamCode) {
+    return <TeamGate onSubmit={setTeamCode} />;
+  }
+
   return (
     <>
       <Toast message={toast} />
-      <TopBar tab={tab} onTabChange={setTab} floorsCount={floors.length} />
+      <TopBar tab={tab} onTabChange={setTab} floorsCount={floors.length} teamCode={teamCode} onSwitchTeam={handleSwitchTeam} />
       <main className={`content${tab === 'inspect' ? ' has-savebar' : ''}`}>
-        {tab === 'inspect' ? (
+        {!floorsLoaded ? (
+          <p className="loading-hint">טוען נתונים משותפים...</p>
+        ) : tab === 'inspect' ? (
           <InspectView
             site={site}
             onSiteChange={setSite}
