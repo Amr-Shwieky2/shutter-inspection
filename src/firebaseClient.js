@@ -14,15 +14,19 @@ import {
 } from 'firebase/firestore';
 import { normalizeDirections, toFirestoreDirections } from './domain';
 
-// Firebase web config is not a secret - access is governed by Firestore
-// security rules (see firestore.rules), not by hiding this key.
+// Firebase web config is not a secret in the traditional sense - access is
+// governed by Firestore security rules (see firestore.rules), not by hiding
+// this key, and since this is a client-only app it still ends up inlined in
+// the built JS bundle regardless. It's still pulled from .env (gitignored,
+// see .env.example) rather than hardcoded, so the project's config isn't
+// sitting in source/git history and can differ per environment.
 const firebaseConfig = {
-  apiKey: 'AIzaSyCYOqJGO0vR0Y41if8DVN_XUi10zkD5TVA',
-  authDomain: 'shutter-inspection-app.firebaseapp.com',
-  projectId: 'shutter-inspection-app',
-  storageBucket: 'shutter-inspection-app.firebasestorage.app',
-  messagingSenderId: '573950131133',
-  appId: '1:573950131133:web:8b7c5a8df33b80dd4f30d4',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
